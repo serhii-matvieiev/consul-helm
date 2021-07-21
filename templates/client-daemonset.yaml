@@ -31,8 +31,8 @@ spec:
         release: {{ .Release.Name }}
         component: client
         hasDNS: "true"
-        {{- if .Values.client.extraLabels }}
-          {{- toYaml .Values.client.extraLabels | nindent 8 }}
+        {{- if or .Values.global.extraLabels .Values.client.extraLabels }}
+          {{- toYaml (mergeOverwrite .Values.global.extraLabels .Values.client.extraLabels) | nindent 8 }}
         {{- end }}
       annotations:
         "consul.hashicorp.com/connect-inject": "false"
@@ -186,13 +186,15 @@ spec:
               value: /consul/tls/ca/tls.crt
             {{- end }}
             {{- end }}
+            {{- if and (not .Values.client.join) .Values.server.enabled }}
+            - name: CONSUL_FULLNAME
+              value: {{template "consul.fullname" . }}
+            {{- end }}
             {{- include "consul.extraEnvironmentVars" .Values.client | nindent 12 }}
-          command:
+          args:
             - "/bin/sh"
             - "-ec"
             - |
-              CONSUL_FULLNAME="{{template "consul.fullname" . }}"
-
               exec /bin/consul agent \
                 -node="${NODE}" \
                 -advertise="${ADVERTISE_IP}" \

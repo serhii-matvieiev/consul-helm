@@ -4,6 +4,27 @@ IMPROVEMENTS:
 * Set failurePolicy to Fail for connectInject mutating webhook so that pods fail to schedule when the webhook is offline. This can be controlled via `connectInject.failurePolicy`. [[GH-1024](https://github.com/hashicorp/consul-helm/pull/1024)]
 * Allow setting global.logLevel and global.logJSON and propogate this to all consul-k8s commands. [[GH-980](https://github.com/hashicorp/consul-helm/pull/980)]
 * Allow setting `connectInject.replicas` to control number of replicas of webhook injector. [[GH-1029](https://github.com/hashicorp/consul-helm/pull/1029)]
+* Change `CONSUL_HTTP_ADDR` and `CONSUL_GRPC_ADDR` in all objects. So all applications use consul client service instead of hostIP.
+
+FEATURES:
+* Add `connectInject.failurePolicy` to specify failurePolicy to connect-inject MutatingWebhook (default `Ignore`)
+* Add `controller.clusterName` support to make cluster name dns name configurable in `webhook-cert-manager-config` configmap.
+* Add `grpc` port to consul client service.
+* Add `.extraLabels` and `global.extraLabels` support to connectInject, test-runnet, controller and meshGateway.
+* Add `connectInject.replicas` to specify amount of connect inject replicas (default `1`).
+* Add consul client service. Consul sync uses the service instead of host IP.
+* Add `.extraLabels` settings to specify extra labels to sync-catalog deployment.
+* Add `syncCatalog.extraLabels` settings to specify extra labels to sync-catalog deployment.
+* Add `syncCatalog.replicas` settings to specify amount of sync-catalog replicas.
+* Add `global.extraLabels` setting to add global labels to consul sync, connect-inject deployment and client daemonset.
+* Add node-readiness nealth check
+
+BUG FIXES:
+* Fix zombie issue, when the entry-point is not dumb-init but agent itself that can't handle zombies. Zombie process could be produced if there is some health check script that reaches timeout during the check. There is `command:` was replaced to `args:` in the `consul-agent` daemonset.
+* Fix `CONSUL_FULLNAME` variable in `consul-client` daemonset. Moved from shell to container variables. Enable only in case if server is enabled (see retry-join part of the daemonset template).
+* Fix `extraLabels` default value from `null` to `{}`.
+* Fix wrong `terraform` formatting in `variables.tf` files in test/terraform folders. Add missing spaces.
+
 
 ## 0.32.1 (June 29, 2021)
 

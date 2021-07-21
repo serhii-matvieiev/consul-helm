@@ -26,6 +26,9 @@ spec:
         heritage: {{ .Release.Service }}
         release: {{ .Release.Name }}
         component: controller
+        {{- if or .Values.global.extraLabels .Values.controller.extraLabels }}
+          {{- toYaml (mergeOverwrite .Values.global.extraLabels .Values.controller.extraLabels) | nindent 8 }}
+        {{- end }}
       annotations:
         "consul.hashicorp.com/connect-inject": "false"
     spec:
@@ -104,9 +107,9 @@ spec:
         {{- end }}
         - name: CONSUL_HTTP_ADDR
           {{- if .Values.global.tls.enabled }}
-          value: https://$(HOST_IP):8501
+          value: https://{{ template "consul.fullname" . }}-client:8501
           {{- else }}
-          value: http://$(HOST_IP):8500
+          value: http://{{ template "consul.fullname" . }}-client:8500
           {{- end }}
         image: {{ .Values.global.imageK8S }}
         name: controller

@@ -32,7 +32,7 @@ data:
           "{{ template "consul.fullname" . }}-controller-webhook",
           "{{ template "consul.fullname" . }}-controller-webhook.{{ .Release.Namespace }}",
           "{{ template "consul.fullname" . }}-controller-webhook.{{ .Release.Namespace }}.svc",
-          "{{ template "consul.fullname" . }}-controller-webhook.{{ .Release.Namespace }}.svc.cluster.local"
+          "{{ template "consul.fullname" . }}-controller-webhook.{{ .Release.Namespace }}.svc.{{ .Values.controller.clusterName }}"
         ],
         "secretName": "{{ template "consul.fullname" . }}-controller-webhook-cert",
         "secretNamespace": "{{ .Release.Namespace }}"

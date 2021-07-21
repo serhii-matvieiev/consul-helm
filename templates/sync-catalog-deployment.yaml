@@ -26,8 +26,8 @@ spec:
         chart: {{ template "consul.chart" . }}
         release: {{ .Release.Name }}
         component: sync-catalog
-        {{- if .Values.syncCatalog.extraLabels }}
-          {{- toYaml .Values.syncCatalog.extraLabels | nindent 8 }}
+        {{- if or .Values.global.extraLabels .Values.syncCatalog.extraLabels }}
+          {{- toYaml (mergeOverwrite .Values.global.extraLabels .Values.syncCatalog.extraLabels) | nindent 8 }}
         {{- end }}
       annotations:
         "consul.hashicorp.com/connect-inject": "false"
@@ -82,7 +82,7 @@ spec:
             {{- if .Values.global.tls.enabled }}
             {{- if .Values.client.enabled }}
             - name: CONSUL_HTTP_ADDR
-              value: https://$(HOST_IP):8501
+              value: https://{{ template "consul.fullname" . }}-client:8501
             {{- else }}
             - name: CONSUL_HTTP_ADDR
               value: https://{{ template "consul.fullname" . }}-server:8501
@@ -92,7 +92,7 @@ spec:
             {{- else }}
             {{- if .Values.client.enabled }}
             - name: CONSUL_HTTP_ADDR
-              value: http://$(HOST_IP):8500
+              value: http://{{ template "consul.fullname" . }}-client:8500
             {{- else }}
             - name: CONSUL_HTTP_ADDR
               value: http://{{ template "consul.fullname" . }}-server:8500

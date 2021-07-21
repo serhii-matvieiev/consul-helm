@@ -64,6 +64,19 @@ global:
   # @default: hashicorp/consul-k8s:<latest version>
   imageK8S: "hashicorp/consul-k8s:0.26.0"
 
+  # Extra labels to attach to the all pods. This should be a YAML map.
+  #
+  # Example:
+  #
+  # ```yaml
+  # extraLabels:
+  #   labelKey: label-value
+  #   anotherLabelKey: another-label-value
+  # ```
+  #
+  # @type: map
+  extraLabels: {}
+
   # The name of the datacenter that the agents should
   # register as. This can't be changed once the Consul cluster is up and running
   # since Consul doesn't support an automatic way to change this value currently:
@@ -600,7 +613,7 @@ server:
   # ```
   #
   # @type: map
-  extraLabels: null
+  extraLabels: {}
 
   # This value defines additional annotations for
   # server pods. This should be formatted as a multi-line string.
@@ -895,7 +908,7 @@ client:
   # ```
   #
   # @type: map
-  extraLabels: null
+  extraLabels: {}
 
   # A list of extra environment variables to set within the stateful set.
   # These could be used to include proxy settings required for cloud auto-join
@@ -908,6 +921,26 @@ client:
   # for client pods to use.
   # @type: string
   dnsPolicy: null
+
+  # The service option configures the Service that fronts the Client DaemonSet.
+  service:
+    # Type of service, ex. LoadBalancer, ClusterIP.
+    type: ClusterIP
+
+    # Annotations to apply to the client service.
+    #
+    # Example:
+    #
+    # ```yaml
+    # annotations: |
+    #   'annotation-key': annotation-value
+    # ```
+    # @type: string
+    annotations: null
+
+    # Optional YAML string that will be appended to the Service spec.
+    # @type: string
+    additionalSpec: null
 
   # hostNetwork defines whether or not we use host networking instead of hostPort in the event
   # that a CNI plugin doesn't support `hostPort`. This has security implications and is not recommended
@@ -1170,6 +1203,19 @@ syncCatalog:
 
   # Optional priorityClassName.
   priorityClassName: ""
+
+  # Extra labels to attach to the catalog sync pods. This should be a YAML map.
+  #
+  # Example:
+  #
+  # ```yaml
+  # extraLabels:
+  #   labelKey: label-value
+  #   anotherLabelKey: another-label-value
+  # ```
+  #
+  # @type: map
+  extraLabels: {}
 
   # If true, will sync Kubernetes services to Consul. This can be disabled to
   # have a one-way sync.
@@ -1562,6 +1608,11 @@ connectInject:
     # `k8s-staging` Consul namespace.
     mirroringK8SPrefix: ""
 
+  # Default failurePolicy for the connect-inject-mutatingwebhook. It allows
+  # to specify not to Ignore if no connect-injector-webhook-deployment pod is alive.
+  # Set it to Fail if you need to restrict rollout if injector is not alive.
+  failurePolicy: Ignore
+
   # Selector labels for connectInject pod assignment, formatted as a multi-line string.
   # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   #
@@ -1665,6 +1716,19 @@ controller:
   # The number of deployment replicas.
   replicas: 1
 
+  # Extra labels to attach to the controller pod. This should be a YAML map.
+  #
+  # Example:
+  #
+  # ```yaml
+  # extraLabels:
+  #   labelKey: label-value
+  #   anotherLabelKey: another-label-value
+  # ```
+  #
+  # @type: map
+  extraLabels: {}
+
   # Log verbosity level. One of "debug", "info", "warn", or "error".
   # @type: string
   logLevel: ""
@@ -1708,6 +1772,9 @@ controller:
 
   # Optional priorityClassName.
   priorityClassName: ""
+
+  # The cluster DNS name in webhook-config
+  clusterName: cluster.local
 
   # Refers to a Kubernetes secret that you have created that contains
   # an ACL token for your Consul cluster which grants the controller process the correct

@@ -33,6 +33,9 @@ spec:
         chart: {{ template "consul.chart" . }}
         release: {{ .Release.Name }}
         component: mesh-gateway
+        {{- if or .Values.global.extraLabels .Values.meshGateway.extraLabels }}
+          {{- toYaml (mergeOverwrite .Values.global.extraLabels .Values.meshGateway.extraLabels) | nindent 8 }}
+        {{- end }}
       annotations:
         "consul.hashicorp.com/connect-inject": "false"
         {{- if (and .Values.global.metrics.enabled .Values.global.metrics.enableGatewayMetrics) }}
@@ -120,12 +123,12 @@ spec:
                   fieldPath: status.podIP
             {{- if .Values.global.tls.enabled }}
             - name: CONSUL_HTTP_ADDR
-              value: https://$(HOST_IP):8501
+              value: https://{{ template "consul.fullname" . }}-client:8501
             - name: CONSUL_CACERT
               value: /consul/tls/ca/tls.crt
             {{- else }}
             - name: CONSUL_HTTP_ADDR
-              value: http://$(HOST_IP):8500
+              value: http://{{ template "consul.fullname" . }}-client:8500
             {{- end }}
           command:
             - "/bin/sh"
@@ -279,16 +282,16 @@ spec:
             {{- end}}
             {{- if .Values.global.tls.enabled }}
             - name: CONSUL_HTTP_ADDR
-              value: https://$(HOST_IP):8501
+              value: https://{{ template "consul.fullname" . }}-client:8501
             - name: CONSUL_GRPC_ADDR
-              value: https://$(HOST_IP):8502
+              value: https://{{ template "consul.fullname" . }}-client:8502
             - name: CONSUL_CACERT
               value: /consul/tls/ca/tls.crt
             {{- else }}
             - name: CONSUL_HTTP_ADDR
-              value: http://$(HOST_IP):8500
+              value: http://{{ template "consul.fullname" . }}-client:8500
             - name: CONSUL_GRPC_ADDR
-              value: $(HOST_IP):8502
+              value: {{ template "consul.fullname" . }}-client:8502
             {{- end }}
           command:
             - /consul-bin/consul
@@ -357,12 +360,12 @@ spec:
                   fieldPath: status.podIP
             {{- if .Values.global.tls.enabled }}
             - name: CONSUL_HTTP_ADDR
-              value: https://$(HOST_IP):8501
+              value: https://{{ template "consul.fullname" . }}-client:8501
             - name: CONSUL_CACERT
               value: /consul/tls/ca/tls.crt
             {{- else }}
             - name: CONSUL_HTTP_ADDR
-              value: http://$(HOST_IP):8500
+              value: http://{{ template "consul.fullname" . }}-client:8500
             {{- end }}
           command:
             - consul-k8s

@@ -9,6 +9,9 @@ metadata:
     chart: {{ template "consul.chart" . }}
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
+    {{- if or .Values.global.extraLabels .Values.tests.extraLabels }}
+      {{- toYaml (mergeOverwrite .Values.global.extraLabels .Values.tests.extraLabels) | nindent 4 }}
+    {{- end }}
   annotations:
     "helm.sh/hook": test-success
 spec:
@@ -44,12 +47,12 @@ spec:
               fieldPath: status.hostIP
         {{- if .Values.global.tls.enabled }}
         - name: CONSUL_HTTP_ADDR
-          value: https://$(HOST_IP):8501
+          value: https://{{ template "consul.fullname" . }}-client:8501
         - name: CONSUL_CACERT
           value: /consul/tls/ca/tls.crt
         {{- else }}
         - name: CONSUL_HTTP_ADDR
-          value: http://$(HOST_IP):8500
+          value: http://{{ template "consul.fullname" . }}-client:8500
         {{- end }}
       {{- if .Values.global.tls.enabled }}
       volumeMounts:

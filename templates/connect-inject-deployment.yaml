@@ -33,6 +33,9 @@ spec:
         chart: {{ template "consul.chart" . }}
         release: {{ .Release.Name }}
         component: connect-injector
+        {{- if or .Values.global.extraLabels .Values.connectInject.extraLabels }}
+          {{- toYaml (mergeOverwrite .Values.global.extraLabels .Values.connectInject.extraLabels) | nindent 8 }}
+        {{- end }}
       annotations:
         "consul.hashicorp.com/connect-inject": "false"
     spec:
@@ -72,9 +75,9 @@ spec:
             {{- end }}
             - name: CONSUL_HTTP_ADDR
               {{- if .Values.global.tls.enabled }}
-              value: https://$(HOST_IP):8501
+              value: https://{{ template "consul.fullname" . }}-client:8501
               {{- else }}
-              value: http://$(HOST_IP):8500
+              value: http://{{ template "consul.fullname" . }}-client:8500
               {{- end }}
           command:
             - "/bin/sh"

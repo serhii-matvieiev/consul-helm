@@ -44,13 +44,7 @@ spec:
             -deployment-namespace={{ .Release.Namespace }}
         image: {{ .Values.global.imageK8S }}
         name: webhook-cert-manager
-        resources:
-          limits:
-            cpu: 100m
-            memory: 50Mi
-          requests:
-            cpu: 100m
-            memory: 50Mi
+        resources: {{ toYaml .Values.controller.certManager.resources | nindent 12 }}
         volumeMounts:
         - name: config
           mountPath: /bootstrap/config
